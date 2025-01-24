@@ -11,7 +11,8 @@
     "scripting"
   ],
   "host_permissions": [
-    "https://api.audd.io/*"
+    "https://api.audd.io/",
+    "https://www.googleapis.com/"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -33,5 +34,6 @@
   "content_scripts": [{
     "matches": ["<all_urls>"],
     "js": ["content.js"]
-  }]
+  }],
+  "options_page": "options.html"
 } 

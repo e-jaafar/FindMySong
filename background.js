@@ -25,8 +25,24 @@ async function initializeTabCapture() {
   });
 }
 
+async function searchYouTube(artist, title) {
+  const query = encodeURIComponent(`${artist} - ${title} official music video`);
+  const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=YOUR_YOUTUBE_API_KEY`);
+  const data = await response.json();
+  
+  if (data.items && data.items.length > 0) {
+    return `https://www.youtube.com/watch?v=${data.items[0].id.videoId}`;
+  }
+  return null;
+}
+
+function getYouTubeSearchUrl(artist, title) {
+  const query = encodeURIComponent(`${artist} - ${title} official music video`);
+  return `https://www.youtube.com/results?search_query=${query}`;
+}
+
 // Modification de la fonction sendToAudD
-async function sendToAudD(base64Data, mimeType) {
+async function sendToAudD(base64Data) {
   console.log('Préparation des données pour AudD...');
   
   const { apiKey } = await chrome.storage.sync.get(['apiKey']);
@@ -34,6 +50,9 @@ async function sendToAudD(base64Data, mimeType) {
     throw new Error('Clé API manquante');
   }
 
+  const formData = new FormData();
+  formData.append('api_token', apiKey);
+  
   // Conversion du base64 en Blob
   const byteCharacters = atob(base64Data);
   const byteNumbers = new Array(byteCharacters.length);
@@ -41,12 +60,8 @@ async function sendToAudD(base64Data, mimeType) {
     byteNumbers[i] = byteCharacters.charCodeAt(i);
   }
   const byteArray = new Uint8Array(byteNumbers);
-  const audioBlob = new Blob([byteArray], { type: mimeType });
-
-  console.log('Taille du fichier audio:', audioBlob.size, 'bytes');
-
-  const formData = new FormData();
-  formData.append('api_token', apiKey);
+  const audioBlob = new Blob([byteArray], { type: 'audio/webm;codecs=opus' });
+  
   formData.append('file', audioBlob, 'audio.webm');
   formData.append('return', 'apple_music,spotify');
 
@@ -71,10 +86,15 @@ async function sendToAudD(base64Data, mimeType) {
       throw new Error('Musique non reconnue');
     }
 
+    // Création du lien de recherche YouTube
+    const youtubeLink = getYouTubeSearchUrl(data.result.artist, data.result.title);
+
     return {
       artist: data.result.artist,
       title: data.result.title,
-      link: data.result.spotify?.external_urls?.spotify || data.result.apple_music?.url
+      spotify: data.result.spotify?.external_urls?.spotify || null,
+      appleMusic: data.result.apple_music?.url || null,
+      youtube: youtubeLink
     };
   } catch (error) {
     console.error('Erreur détaillée:', error);
@@ -166,21 +186,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       message: 'Analyse de l\'audio...'
     });
 
-    sendToAudD(request.data, request.mimeType)
-      .then(result => {
-        console.log('Résultat obtenu:', result);
-        chrome.runtime.sendMessage({
-          action: 'identificationResult',
-          ...result
+    try {
+      // Les données sont déjà en base64, on peut les utiliser directement
+      sendToAudD(request.data)
+        .then(result => {
+          console.log('Résultat obtenu:', result);
+          chrome.runtime.sendMessage({
+            action: 'identificationResult',
+            ...result
+          });
+        })
+        .catch(error => {
+          console.error('Erreur identification:', error);
+          chrome.runtime.sendMessage({
+            action: 'error',
+            message: error.message
+          });
         });
-      })
-      .catch(error => {
-        console.error('Erreur identification:', error);
-        chrome.runtime.sendMessage({
-          action: 'error',
-          message: error.message
-        });
+    } catch (error) {
+      console.error('Erreur de traitement audio:', error);
+      chrome.runtime.sendMessage({
+        action: 'error',
+        message: 'Erreur de traitement audio'
       });
+    }
+    return true;
   }
   return true;
 });

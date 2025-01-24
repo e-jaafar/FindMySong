@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Historique - Find My Song</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-hover: #4f46e5;
+      --background: #f9fafb;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --border-color: #e5e7eb;
+      --radius: 12px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--background);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .clear-button {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .clear-button:hover {
+      background: #dc2626;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .history-item {
+      background: white;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s;
+    }
+
+    .history-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .song-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .song-details h2 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .song-details p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .timestamp {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .streaming-links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .streaming-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+      transition: all 0.2s;
+    }
+
+    .streaming-button img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .spotify { background: #1DB954; }
+    .spotify:hover { background: #1aa34a; }
+    
+    .apple { background: #FA2C55; }
+    .apple:hover { background: #e1274c; }
+    
+    .youtube { background: #FF0000; }
+    .youtube:hover { background: #e60000; }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      background: white;
+      border-radius: var(--radius);
+      color: var(--text-secondary);
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    @media (max-width: 640px) {
+      .streaming-links {
+        flex-wrap: wrap;
+      }
+      
+      .streaming-button {
+        flex: 1;
+        min-width: 120px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Historique d'écoute</h1>
+      <button id="clearHistory" class="clear-button">Effacer l'historique</button>
+    </div>
+
+    <div id="historyList" class="history-list">
+      <!-- Les éléments seront ajoutés dynamiquement -->
+    </div>
+
+    <div id="emptyState" class="empty-state hidden">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+      </svg>
+      <h2>Aucun historique</h2>
+      <p>Les chansons identifiées apparaîtront ici</p>
+    </div>
+  </div>
+  <script src="history.js"></script>
+</body>
+</html>
