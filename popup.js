@@ -90,6 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function createRecentItem(item) {
     const div = document.createElement('div');
     div.className = 'recent-item';
+    
+    // Ajout de l'image de fond si disponible
+    if (item.image) {
+      div.style.background = `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('${item.image}')`;
+      div.style.backgroundSize = 'cover';
+      div.style.backgroundPosition = 'center';
+      div.style.backgroundRepeat = 'no-repeat';
+    }
+    
     div.innerHTML = `
       <div class="recent-item-title">${item.title}</div>
       <div class="recent-item-artist">${item.artist}</div>
@@ -135,35 +144,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Charger l'historique récent au démarrage
   loadRecentHistory();
+  
 
   // Fonction pour afficher le résultat
   function displayResult(result) {
-    resultContainer.classList.remove('hidden');
     songTitle.textContent = result.title;
     songArtist.textContent = result.artist;
 
-    // Réinitialisation des liens
-    spotifyLink.style.display = 'none';
-    appleLink.style.display = 'none';
-    youtubeLink.style.display = 'none';
+    // Ajout de l'image en background
+    if (result.image) {
+      console.log('Image URL:', result.image); // Pour déboguer
+      const resultContainer = document.querySelector('.result-container');
+      resultContainer.style.background = `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('${result.image}')`;
+      resultContainer.style.backgroundSize = 'cover';
+      resultContainer.style.backgroundPosition = 'center';
+      resultContainer.style.backgroundRepeat = 'no-repeat';
+    }
 
-    // Gestion des liens de streaming
+    // Mise à jour des liens
     if (result.spotify) {
       spotifyLink.href = result.spotify;
-      spotifyLink.style.display = 'flex';
+      spotifyLink.classList.remove('hidden');
+    } else {
+      spotifyLink.classList.add('hidden');
     }
-    
+
     if (result.appleMusic) {
       appleLink.href = result.appleMusic;
-      appleLink.style.display = 'flex';
+      appleLink.classList.remove('hidden');
+    } else {
+      appleLink.classList.add('hidden');
     }
 
     if (result.youtube) {
       youtubeLink.href = result.youtube;
-      youtubeLink.style.display = 'flex';
+      youtubeLink.classList.remove('hidden');
+    } else {
+      youtubeLink.classList.add('hidden');
     }
 
-    // Sauvegarder dans l'historique
+    resultContainer.classList.remove('hidden');
+
+    // Sauvegarder dans l'historique avec l'image
     chrome.storage.local.get(['songHistory'], function(data) {
       const history = data.songHistory || [];
       const newEntry = {
@@ -172,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         spotify: result.spotify,
         appleMusic: result.appleMusic,
         youtube: result.youtube,
+        image: result.image,
         timestamp: Date.now()
       };
 
@@ -181,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       chrome.storage.local.set({ songHistory: history }, () => {
-        // Recharger l'historique récent après l'ajout
         loadRecentHistory();
       });
     });
